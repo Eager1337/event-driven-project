@@ -1,0 +1,12 @@
+.env
+config.properties
+target/
+.idea/
+.vscode/
+*.iml
+*.log
+backup*.sql
+.DS_Store
+task.md
+__pycache__/
+*.zip
