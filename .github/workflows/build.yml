@@ -54,6 +54,7 @@ jobs:
         run: |
           python scripts/build_report.py --pdf
           python scripts/package.py
+          cp ../marketflow-complete-project.zip marketflow-complete-project.zip
       - name: Commit generated deliverables
         run: |
           git config user.name 'github-actions[bot]'
@@ -66,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: marketflow-complete-project
-          path: ../marketflow-complete-project.zip
+          path: marketflow-complete-project.zip
           retention-days: 90
       - name: Preserve test output on failure
         if: failure()

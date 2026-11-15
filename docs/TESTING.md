@@ -8,7 +8,7 @@ Result: **25 tests passed; 0 failures; 0 errors; 0 skips.**
 - StoreTest: 10 real MySQL persistence/transaction/concurrency tests.
 - GuiTest: 1 multi-step Swing checkout, accessibility-name check and five Robot screenshots.
 
-Maven XML/text results are copied into docs/test-results/ in the completed bundle. GitHub Actions performs an independent MySQL 8.4 service-container run; use its actual run status rather than assuming a pass.
+Maven XML/text results are copied into docs/test-results/ in the completed bundle. GitHub Actions independently passed all 25 tests using Temurin Java 17 and a MySQL 8.4 service container in run 43648226441. That first run failed only at ZIP artifact upload because the action rejected a parent-directory path; the workflow now copies the ZIP into the workspace before uploading it. Check the latest Actions run for the complete pipeline status.
 
 ## Reproduce
 Ordinary `mvn clean verify` requires no database and runs only the 14 unit tests; environment-dependent suites are skipped by design.
