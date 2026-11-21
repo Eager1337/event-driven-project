@@ -1,5 +1,7 @@
 # Individual demonstration guide (8–10 minutes)
 
+For a fuller spoken script, beginner code explanations and practice Q&A, read [PRESENTATION-STUDY-GUIDE.md](PRESENTATION-STUDY-GUIDE.md).
+
 Before presenting: run setup, open the application, verify MySQL is available, keep the repository and printed report ready. Use synthetic products only. Fill in your actual identities and contribution details. Do not invent a team history.
 
 1. **Problem and architecture (1 minute).** Explain how a small shop records sales and keeps stock consistent. Point to App, MainFrame, Domain, Store, Database and Tables.
