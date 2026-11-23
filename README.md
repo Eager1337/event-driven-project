@@ -91,12 +91,6 @@ compose.yaml       MySQL 8.4 service and persistent volume
 .github/           CI workflow and issue templates
 ```
 
-## Submission
-Start with the [Excellent-band readiness audit](docs/excellent-audit.report/content.md), [SDG/DPG evidence](docs/SDG-DPG-EVIDENCE.md), [real group contribution template](docs/GROUP-CONTRIBUTIONS.md), and [timed mock-viva practice](docs/MOCK-VIVA-PRACTICE.md). These support assessment but do not guarantee marks. For an existing working installation, follow [safe upgrade instructions](docs/UPGRADING-SAFELY.md); no database reset or schema change is needed.
-
-For beginner preparation, start with the [presentation script, code walkthrough and viva study guide](docs/PRESENTATION-STUDY-GUIDE.md). It includes what to say, click and show for each rubric category, plus practice answers and honest limitations.
-
-Read [demonstration guide](docs/DEMONSTRATION.md), [project report](docs/report.md), [rubric mapping](docs/REQUIREMENTS.md), and [contribution guidance](CONTRIBUTING.md). Fill in your real student/group identities in the editable report before printing. No lecturer invitation has been sent: the brief gives an email, not a confirmed GitHub username. Invite the correct account via Settings → Collaborators → Add people after confirming it. Understand and present the code yourself, disclose assistance according to university policy, and do not fabricate group contributions. The brief's “Python file” instruction conflicts with its explicit Java Swing framework requirement; confirm the expected source submission with your lecturer.
 
 ## License
 Original application code is MIT licensed. JDBC dependencies keep their own licenses; see THIRD_PARTY_NOTICES.md. This is designed with digital-public-goods principles in mind, **not a certified DPG**.
