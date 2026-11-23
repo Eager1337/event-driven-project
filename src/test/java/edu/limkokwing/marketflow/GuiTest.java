@@ -41,6 +41,57 @@ class GuiTest {
             assertEquals("Search products",f.search.getAccessibleContext().getAccessibleName());
         }finally{SwingUtilities.invokeAndWait(()->{for(Window w:Window.getWindows())w.dispose();});}
     }
+    @Test void historyNavigationSortingAndAccessibility()throws Exception{
+        Database db=StoreTest.testDatabase();
+        try(Connection c=db.open();Statement s=c.createStatement()){
+            s.executeUpdate("DELETE FROM sale_items");s.executeUpdate("DELETE FROM sales");s.executeUpdate("DELETE FROM products");
+            s.executeUpdate("INSERT INTO products(sku,name,category,price,stock,reorder_level,active) VALUES('GUI-1','GUI item','Test',10,100,1,TRUE)");
+            for(int i=0;i<55;i++)s.executeUpdate("INSERT INTO sales(subtotal,discount_percent,total,payment,tendered,change_due) VALUES(10,0,10,'CARD',10,0)");
+        }
+        AtomicReference<MainFrame> ref=new AtomicReference<>();
+        SwingUtilities.invokeAndWait(()->{try{App.configureUI();}catch(Exception e){throw new RuntimeException(e);}MainFrame frame=new MainFrame(new Store(db));frame.setVisible(true);ref.set(frame);});
+        MainFrame f=ref.get();
+        try{
+            awaitIdle(f);
+            SwingUtilities.invokeAndWait(()->{
+                assertEquals(50,f.salesModel.getRowCount());assertFalse(findButton(f,"Newer sales").isEnabled());assertTrue(findButton(f,"Older sales").isEnabled());
+                assertLabel(f,"Discount %",f.discount);assertLabel(f,"Tendered SLE",f.tendered);
+                assertEquals("Sales history",f.salesTable.getAccessibleContext().getAccessibleName());
+                @SuppressWarnings("unchecked") JComboBox<String> scale=(JComboBox<String>)findNamed(f,"Text size");
+                assertNotNull(scale);float original=f.search.getFont().getSize2D();scale.setSelectedIndex(1);assertTrue(f.search.getFont().getSize2D()>original);scale.setSelectedIndex(0);assertEquals(original,f.search.getFont().getSize2D(),0.01f);
+                JCheckBox contrast=findCheckbox(f,"High contrast");assertNotNull(contrast);contrast.doClick();assertEquals(Color.BLACK,f.search.getBackground());contrast.doClick();
+                f.tabs.setSelectedIndex(1);
+            });
+            capture(f,"06-history-pagination.png");
+            SwingUtilities.invokeAndWait(()->findButton(f,"Older sales").doClick());
+            awaitIdle(f);
+            SwingUtilities.invokeAndWait(()->{assertEquals(5,f.salesModel.getRowCount());assertFalse(findButton(f,"Older sales").isEnabled());assertTrue(findButton(f,"Newer sales").isEnabled());});
+            capture(f,"07-older-history.png");
+            SwingUtilities.invokeAndWait(()->findButton(f,"Newer sales").doClick());
+            awaitIdle(f);
+            SwingUtilities.invokeAndWait(()->{
+                assertEquals(50,f.salesModel.getRowCount());
+                f.salesTable.getRowSorter().toggleSortOrder(0);
+                long previous=-1;
+                for(int i=0;i<f.salesTable.getRowCount();i++){long id=(Long)f.salesTable.getValueAt(i,0);assertTrue(id>previous);previous=id;}
+                findButton(f,"Older sales").doClick();
+            });
+            awaitIdle(f);SwingUtilities.invokeAndWait(()->findButton(f,"Refresh history").doClick());awaitIdle(f);
+            SwingUtilities.invokeAndWait(()->{assertEquals(50,f.salesModel.getRowCount());assertFalse(findButton(f,"Newer sales").isEnabled());});
+        }finally{SwingUtilities.invokeAndWait(f::dispose);}
+    }
+    private static void assertLabel(Container parent,String text,JComponent target){
+        assertTrue(hasLabel(parent,text,target),"Missing label association: "+text);
+    }
+    private static JComponent findNamed(Container parent,String name){
+        for(Component c:parent.getComponents()){if(c instanceof JComponent j&&j.getAccessibleContext()!=null&&name.equals(j.getAccessibleContext().getAccessibleName()))return j;if(c instanceof Container box){JComponent found=findNamed(box,name);if(found!=null)return found;}}return null;
+    }
+    private static JCheckBox findCheckbox(Container parent,String text){
+        for(Component c:parent.getComponents()){if(c instanceof JCheckBox b&&b.getText().equals(text))return b;if(c instanceof Container box){JCheckBox found=findCheckbox(box,text);if(found!=null)return found;}}return null;
+    }
+    private static boolean hasLabel(Container parent,String text,JComponent target){
+        for(Component c:parent.getComponents()){if(c instanceof JLabel l&&l.getText().equals(text)&&l.getLabelFor()==target)return true;if(c instanceof Container box&&hasLabel(box,text,target))return true;}return false;
+    }
     private static JButton findButton(Container parent,String text){
         for(Component c:parent.getComponents()){if(c instanceof JButton b && b.getText().equals(text))return b;if(c instanceof Container box){JButton found=findButton(box,text);if(found!=null)return found;}}return null;
     }

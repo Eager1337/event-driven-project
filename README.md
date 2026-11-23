@@ -36,7 +36,7 @@ The run scripts use the included JAR; if it is not available, they build with Ma
 1. Choose a product in Checkout; select quantity and **Add to cart**. Double-click a product also adds it.
 2. Choose a 0–50% discount and Cash or Card. For cash, enter the amount received.
 3. **Complete sale** saves the sale, item snapshots and stock reduction atomically. Confirm the amount, then save or print the receipt.
-4. **Sales history** shows the latest 1,000 sales. Select a sale to view its receipt or export the loaded history as CSV.
+4. **Sales history** loads 50 sales per page. Use Older sales / Newer sales to browse beyond the former 1,000-sale limit. Refresh history returns to newest sales. Header sorting applies to the loaded page only. Select a sale to view its receipt; Export page CSV saves only the current page, not a complete database backup.
 5. **New product / Edit** manage SKU, category, price, stock and reorder threshold. **Archive** hides a product without destroying old receipts. Enable Include archived and Edit to reactivate.
 6. **Help & accessibility** offers high contrast, text size controls and keyboard guidance.
 
@@ -49,7 +49,7 @@ Currency is SLE; sample prices are synthetic. No taxes, refunds, authentication,
 mvn -B clean verify
 java -jar target/marketflow.jar
 ```
-The ordinary build runs 14 unit tests and intentionally skips the database/GUI suites. Full verification requires an **isolated `marketflow_test` database**, never your real inventory database. The CI workflow provisions one, runs all 25 tests under Xvfb, captures screenshots, renders the report and publishes a complete bundle. See [testing evidence](docs/TESTING.md).
+The ordinary build runs 16 unit tests and intentionally skips the database/GUI suites. Full verification requires an **isolated `marketflow_test` database**, never your real inventory database. The CI workflow provisions one and is configured to run all 31 tests under Xvfb, capture screenshots, render the report and publish a complete bundle. The fresh local full run passed all 31 tests. See [testing evidence](docs/TESTING.md) and [query-plan evidence](docs/PERFORMANCE-EVIDENCE.md).
 
 Download built files from GitHub → **Actions → Build and package → successful run → marketflow-complete-project**. The workflow also checks in the ready-to-run JAR, report and screenshots. Generated commits made using GitHub's workflow token do not retrigger the workflow. To rebuild manually, use Actions → Run workflow.
 
@@ -92,6 +92,8 @@ compose.yaml       MySQL 8.4 service and persistent volume
 ```
 
 ## Submission
+Start with the [Excellent-band readiness audit](docs/excellent-audit.report/content.md), [SDG/DPG evidence](docs/SDG-DPG-EVIDENCE.md), [real group contribution template](docs/GROUP-CONTRIBUTIONS.md), and [timed mock-viva practice](docs/MOCK-VIVA-PRACTICE.md). These support assessment but do not guarantee marks. For an existing working installation, follow [safe upgrade instructions](docs/UPGRADING-SAFELY.md); no database reset or schema change is needed.
+
 For beginner preparation, start with the [presentation script, code walkthrough and viva study guide](docs/PRESENTATION-STUDY-GUIDE.md). It includes what to say, click and show for each rubric category, plus practice answers and honest limitations.
 
 Read [demonstration guide](docs/DEMONSTRATION.md), [project report](docs/report.md), [rubric mapping](docs/REQUIREMENTS.md), and [contribution guidance](CONTRIBUTING.md). Fill in your real student/group identities in the editable report before printing. No lecturer invitation has been sent: the brief gives an email, not a confirmed GitHub username. Invite the correct account via Settings → Collaborators → Add people after confirming it. Understand and present the code yourself, disclose assistance according to university policy, and do not fabricate group contributions. The brief's “Python file” instruction conflicts with its explicit Java Swing framework requirement; confirm the expected source submission with your lecturer.

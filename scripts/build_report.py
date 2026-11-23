@@ -56,7 +56,9 @@ def build(pdf=False):
              ('02-cart.png', 'Populated cart with 10 percent discount'),
              ('03-receipt.png', 'Persisted receipt and calculated change'),
              ('04-history.png', 'Sales history from the test database'),
-             ('05-accessibility.png', 'Help and accessibility options')]
+             ('05-accessibility.png', 'Help and accessibility options'),
+             ('06-history-pagination.png', 'First page of 55 synthetic sale headers'),
+             ('07-older-history.png', 'Older page with the remaining five synthetic headers')]
     for filename, caption in shots:
         image = ROOT/'docs/screenshots'/filename
         if image.exists():

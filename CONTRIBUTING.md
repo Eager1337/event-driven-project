@@ -1,5 +1,7 @@
 # Contributing
 
+Start with [proposed group assignments and the real contribution log](docs/GROUP-CONTRIBUTIONS.md). Members 1–5 are placeholders; no completed contributions are asserted. Use [mock-viva practice](docs/MOCK-VIVA-PRACTICE.md) to rehearse each person's explanation.
+
 Use Java 17-compatible code. Keep Swing mutations on the EDT and JDBC work off it. Use BigDecimal, prepared statements and try-with-resources. New checkout behavior must have transaction and rollback tests. Never commit credentials, private receipts or real customer information.
 
 For genuine group work: open an issue, branch from main (for example feature/stock-audit), make scoped commits under your own identity, run tests, open a pull request and request a teammate review. Include the problem, approach, testing evidence and screenshots. Do not rewrite history or claim generated commits as student contributions.

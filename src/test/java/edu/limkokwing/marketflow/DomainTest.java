@@ -21,4 +21,18 @@ class DomainTest {
     @Test void snapshotIsImmutable(){Cart c=new Cart();c.add(product("10",2),1);assertThrows(UnsupportedOperationException.class,()->c.lines().clear());}
     @Test void archivedProductCannotBeSold(){assertThrows(IllegalArgumentException.class,()->new Line(new Product(1,"X","Item","General",BigDecimal.ONE,5,1,false),1));}
     @Test void polymorphicTableModels(){Tables.TypedModel<Product> model=new Tables.Products();model.setRows(java.util.List.of(product("10",2)));assertEquals("Low stock",model.getValueAt(0,6));assertFalse(model.isCellEditable(0,0));}
+    @Test void numericCartSortingUsesNumbersNotStrings(){
+        Tables.CartLines model=new Tables.CartLines();
+        model.setRows(java.util.List.of(new Line(product("10",20),10),new Line(product("10",20),2)));
+        javax.swing.table.TableRowSorter<Tables.CartLines> sorter=new javax.swing.table.TableRowSorter<>(model);
+        sorter.toggleSortOrder(1);assertEquals(2,model.getValueAt(sorter.convertRowIndexToModel(0),1));
+        assertEquals(java.math.BigDecimal.class,model.getColumnClass(3));
+    }
+    @Test void numericReceiptSortingAndModelNotification(){
+        Tables.Sales model=new Tables.Sales();java.util.concurrent.atomic.AtomicInteger events=new java.util.concurrent.atomic.AtomicInteger();model.addTableModelListener(e->events.incrementAndGet());
+        java.time.LocalDateTime time=java.time.LocalDateTime.of(2026,11,23,10,0);
+        model.setRows(java.util.List.of(new Sale(10,time,BigDecimal.TEN,0,BigDecimal.TEN,Payment.CARD,BigDecimal.TEN,BigDecimal.ZERO),new Sale(2,time,BigDecimal.ONE,0,BigDecimal.ONE,Payment.CASH,BigDecimal.ONE,BigDecimal.ZERO)));
+        javax.swing.table.TableRowSorter<Tables.Sales> sorter=new javax.swing.table.TableRowSorter<>(model);sorter.toggleSortOrder(0);
+        assertEquals(2L,model.getValueAt(sorter.convertRowIndexToModel(0),0));assertEquals(1,events.get());assertEquals(java.time.LocalDateTime.class,model.getColumnClass(1));
+    }
 }

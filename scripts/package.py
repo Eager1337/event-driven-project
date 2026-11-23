@@ -25,7 +25,8 @@ jar = root/'dist/marketflow.jar'
 (root/'dist/SHA256SUMS.txt').write_text(hashlib.sha256(jar.read_bytes()).hexdigest()+'  marketflow.jar\n', encoding='utf-8')
 archive = root.parent/'marketflow-complete-project.zip'
 skip_dirs = {'.git', 'target', '__pycache__', '.idea', '.vscode'}
-skip_files = {'.env', 'config.properties', 'task.md', 'source.tar.gz.b64'}
+skip_files = {'.env', 'config.properties', 'task.md', 'source.tar.gz.b64', 'PRESENTATION-STUDY-GUIDE.pdf'}
+# The untracked older study-guide PDF is preserved locally, not shipped as current.
 with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as out:
     for path in sorted(root.rglob('*')):
         rel = path.relative_to(root)

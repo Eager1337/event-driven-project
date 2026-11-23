@@ -38,6 +38,12 @@ public final class MainFrame extends JFrame {
     private final TableRowSorter<Tables.Products> sorter = new TableRowSorter<>(productModel);
     private boolean busy;
     private Receipt lastReceipt;
+    static final int HISTORY_PAGE_SIZE = 50;
+    private final java.util.Deque<Long> historyCursors = new java.util.ArrayDeque<>();
+    private long historyCursor;
+    private boolean hasOlderSales;
+    private final JLabel historySummary = new JLabel("Loading sales history…");
+    private JButton olderSales, newerSales;
 
     public MainFrame(Store store) {
         super("MarketFlow | Retail Point of Sale"); this.store=store;
@@ -50,6 +56,8 @@ public final class MainFrame extends JFrame {
         tabs.addTab("1  Checkout", checkoutPanel()); tabs.addTab("2  Sales history", historyPanel()); tabs.addTab("3  Help & accessibility",helpPanel());
         workspace.add(tabs,BorderLayout.CENTER); workspace.add(status,BorderLayout.SOUTH); setContentPane(workspace);
         products.setRowSorter(sorter);
+        salesTable.setAutoCreateRowSorter(true);
+        cartTable.setAutoCreateRowSorter(true);
         search.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e){filter();} public void removeUpdate(DocumentEvent e){filter();} public void changedUpdate(DocumentEvent e){filter();}
         });
@@ -80,7 +88,7 @@ public final class MainFrame extends JFrame {
         JPanel top=new JPanel(new BorderLayout());top.add(filters,BorderLayout.NORTH);top.add(options,BorderLayout.SOUTH);
         catalog.add(top,BorderLayout.NORTH); catalog.add(new JScrollPane(products),BorderLayout.CENTER);
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT));
-        actions.add(new JLabel("Qty"));actions.add(quantity); actions.add(button("Add to cart",KeyEvent.VK_A,this::addSelected));
+        actions.add(labelFor("Qty",quantity));actions.add(quantity); actions.add(button("Add to cart",KeyEvent.VK_A,this::addSelected));
         actions.add(button("New product",KeyEvent.VK_N,()->editProduct(null)));
         actions.add(button("Edit",KeyEvent.VK_E,()->{Product p=selectedProduct();if(p!=null)editProduct(p);}));
         actions.add(button("Archive",KeyEvent.VK_R,this::archiveSelected));actions.add(button("Refresh",KeyEvent.VK_F, this::refresh));
@@ -93,9 +101,9 @@ public final class MainFrame extends JFrame {
         remove.add(button("Remove item",KeyEvent.VK_M,()->{int r=cartTable.getSelectedRow();if(r>=0){cart.remove(cartModel.row(cartTable.convertRowIndexToModel(r)).product().id());updateCart();}else message("Select a cart item first.");}));
         remove.add(button("Clear cart",KeyEvent.VK_L,()->{if(cart.lines().isEmpty() || JOptionPane.showConfirmDialog(this,"Clear all cart items?","Clear cart",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){cart.clear();updateCart();}}));
         pay.add(remove);pay.add(subtotal);
-        JPanel discountRow=new JPanel(new FlowLayout(FlowLayout.LEFT));discountRow.add(new JLabel("Discount %"));discountRow.add(discount);pay.add(discountRow);
+        JPanel discountRow=new JPanel(new FlowLayout(FlowLayout.LEFT));discountRow.add(labelFor("Discount %",discount));discountRow.add(discount);pay.add(discountRow);
         total.setFont(new Font("SansSerif",Font.BOLD,23));pay.add(total);
-        JPanel method=new JPanel(new FlowLayout(FlowLayout.LEFT));ButtonGroup group=new ButtonGroup();group.add(cash);group.add(card);method.add(cash);method.add(card);method.add(new JLabel("Tendered SLE"));method.add(tendered);pay.add(method);
+        JPanel method=new JPanel(new FlowLayout(FlowLayout.LEFT));ButtonGroup group=new ButtonGroup();group.add(cash);group.add(card);method.add(cash);method.add(card);method.add(labelFor("Tendered SLE",tendered));method.add(tendered);pay.add(method);
         pay.add(button("Complete sale  /  Ctrl+Enter",KeyEvent.VK_C,this::completeSale));
         basket.add(pay,BorderLayout.SOUTH);
         JSplitPane split=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,catalog,basket);split.setResizeWeight(0.60);split.setDividerLocation(700);
@@ -103,12 +111,33 @@ public final class MainFrame extends JFrame {
     }
     private JPanel historyPanel() {
         JPanel panel=new JPanel(new BorderLayout(12,12));
-        panel.add(new JLabel("Latest 1,000 sales • Select a receipt to view, save, or print"),BorderLayout.NORTH);
+        accessible(historySummary,"History page status","Current page and number of loaded sales. Refresh returns to newest sales.");
+        panel.add(historySummary,BorderLayout.NORTH);
         panel.add(new JScrollPane(salesTable),BorderLayout.CENTER);
         JPanel actions=new JPanel(new FlowLayout(FlowLayout.LEFT));
         actions.add(button("View receipt",KeyEvent.VK_V,()->{int r=salesTable.getSelectedRow();if(r<0){message("Select a sale first.");return;}long id=salesModel.row(salesTable.convertRowIndexToModel(r)).id();work(()->store.receipt(id),this::showReceipt);}));
-        actions.add(button("Export sales CSV",KeyEvent.VK_X,this::exportSales)); actions.add(button("Refresh history",KeyEvent.VK_H,this::refresh));panel.add(actions,BorderLayout.SOUTH);return panel;
+        actions.add(button("Export page CSV",KeyEvent.VK_X,this::exportSales)); actions.add(button("Refresh history",KeyEvent.VK_H,this::refresh));
+        newerSales=button("Newer sales",KeyEvent.VK_W,this::newerHistory);
+        olderSales=button("Older sales",KeyEvent.VK_O,this::olderHistory);
+        newerSales.setEnabled(false);olderSales.setEnabled(false);actions.add(newerSales);actions.add(olderSales);
+        panel.add(actions,BorderLayout.SOUTH);return panel;
     }
+    void olderHistory() {
+        if(busy || !hasOlderSales || salesModel.getRowCount()==0)return;
+        long cursor=salesModel.row(salesModel.getRowCount()-1).id();
+        work(()->store.salesPage(cursor,HISTORY_PAGE_SIZE),page->{historyCursors.push(historyCursor);historyCursor=cursor;showHistory(page);});
+    }
+    void newerHistory() {
+        if(busy || historyCursors.isEmpty())return;
+        long cursor=historyCursors.peek();
+        work(()->store.salesPage(cursor,HISTORY_PAGE_SIZE),page->{historyCursors.pop();historyCursor=cursor;showHistory(page);});
+    }
+    private void showHistory(Store.SalesPage page) {
+        salesModel.setRows(page.rows());hasOlderSales=page.hasOlder();
+        historySummary.setText("Page "+(historyCursors.size()+1)+" • "+page.rows().size()+" sales • Newest first by default • Export saves this page only");
+        historyButtons();status.setText("Sales history loaded. Refresh history returns to the newest page.");
+    }
+    private void historyButtons(){if(olderSales!=null){olderSales.setEnabled(!busy&&hasOlderSales);newerSales.setEnabled(!busy&&!historyCursors.isEmpty());}}
     private JPanel helpPanel() {
         JPanel panel=new JPanel(new BorderLayout(12,12));
         JTextArea help=new JTextArea("MARKETFLOW — QUICK GUIDE\n\n1. Search or filter products. Select a row, choose quantity, and Add to cart.\n2. Choose discount and Cash or Card. For cash, enter the amount received.\n3. Complete sale. Stock and receipt are saved in one database transaction.\n4. Use Sales history to re-open old receipts or export CSV.\n5. New product / Edit manage inventory; Archive preserves past receipts.\n\nKEYBOARD\nCtrl+F: Search    F5: Refresh    Ctrl+Enter: Checkout\nAlt+1: Checkout tab    Alt+2: Sales history\nTab / Shift+Tab: Move focus    Space: Toggle checkbox/radio button\nUse button mnemonics with Alt and the underlined letter (platform dependent).\n\nACCESSIBILITY & OPENNESS\nNamed Swing accessible contexts, visible focus, scalable fonts, high contrast,\nkeyboard-operable tables and forms. Status messages do not rely on color.\nNo customer personal data is collected. Source is MIT licensed.\n\nThis is an academic, single-operator POS, not a production payment processor.\nCard is a recorded payment method only; no card data is collected or charged.\nDiscount is a demonstration policy; taxes are not calculated.\nDatabase credentials stay on your computer. See docs/ for details.");
@@ -172,10 +201,10 @@ public final class MainFrame extends JFrame {
             work(()->{Files.writeString(path,text,StandardCharsets.UTF_8);return true;},v->status.setText("Saved "+path.getFileName()));
         }
     }
-    private record Snapshot(List<Product> products,List<Sale> sales) {}
+    private record Snapshot(List<Product> products,Store.SalesPage sales) {}
     public void refresh() {
         if(busy)return;boolean include=archived.isSelected();Object previous=category.getSelectedItem();
-        work(()->new Snapshot(store.products(include),store.sales()),data->{productModel.setRows(data.products());salesModel.setRows(data.sales());
+        work(()->new Snapshot(store.products(include),store.salesPage(0,HISTORY_PAGE_SIZE)),data->{productModel.setRows(data.products());historyCursors.clear();historyCursor=0;showHistory(data.sales());
             category.removeAllItems();category.addItem("All categories");data.products().stream().map(Product::category).distinct().sorted().forEach(category::addItem);
             category.setSelectedItem(previous);if(category.getSelectedIndex()<0)category.setSelectedIndex(0);filter();
             long active=data.products().stream().filter(Product::active).count(),low=data.products().stream().filter(p->p.active()&&p.stock()<=p.reorderLevel()).count();
@@ -185,7 +214,7 @@ public final class MainFrame extends JFrame {
     private <T> void work(Callable<T> job,Consumer<T> success) {
         if(busy)return;busy=true;enableTree(workspace,false);status.setText("Working… Please wait.");
         new SwingWorker<T,Void>(){protected T doInBackground()throws Exception{return job.call();}
-            protected void done(){busy=false;enableTree(workspace,true);tendered.setEnabled(cash.isSelected());try{success.accept(get());}catch(Exception e){Throwable cause=e.getCause()==null?e:e.getCause();error(cause);}}
+            protected void done(){busy=false;enableTree(workspace,true);tendered.setEnabled(cash.isSelected());try{success.accept(get());}catch(Exception e){Throwable cause=e.getCause()==null?e:e.getCause();error(cause);}finally{historyButtons();}}
         }.execute();
     }
     private void error(Throwable e) {
@@ -199,9 +228,18 @@ public final class MainFrame extends JFrame {
     private void shortcut(String key,String name,Runnable action){getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(key),name);getRootPane().getActionMap().put(name,new AbstractAction(){public void actionPerformed(ActionEvent e){action.run();}});}
     private static JTable table(javax.swing.table.TableModel model,String name){JTable table=new JTable(model);table.setRowHeight(34);table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);table.setFillsViewportHeight(true);table.getTableHeader().setReorderingAllowed(false);accessible(table,name,"Use arrow keys to select a row.");return table;}
     private static void accessible(JComponent c,String name,String description){c.getAccessibleContext().setAccessibleName(name);c.getAccessibleContext().setAccessibleDescription(description);}
+    private static JLabel labelFor(String name,JComponent field){JLabel label=new JLabel(name);label.setLabelFor(field);return label;}
     private static void addField(JPanel panel,String name,JComponent field){JLabel label=new JLabel(name);label.setLabelFor(field);accessible(field,name,"Enter "+name);panel.add(label);panel.add(field);}
     private static void enableTree(Component c,boolean enabled){c.setEnabled(enabled);if(c instanceof Container box)for(Component child:box.getComponents())enableTree(child,enabled);}
     private static void recolor(Component c,Color bg,Color fg){c.setBackground(bg);c.setForeground(fg);if(c instanceof JTable t){t.getTableHeader().setBackground(bg);t.getTableHeader().setForeground(fg);}if(c instanceof Container box)for(Component child:box.getComponents())recolor(child,bg,fg);}
-    private static void resizeFonts(Component c,int size){if(c.getFont()!=null)c.setFont(c.getFont().deriveFont((float)size));if(c instanceof JTable t){t.setRowHeight(size+18);t.getTableHeader().setFont(t.getTableHeader().getFont().deriveFont((float)size));}if(c instanceof Container box)for(Component child:box.getComponents())resizeFonts(child,size);}
+    private static void resizeFonts(Component c,int size){
+        if(c instanceof JComponent j && c.getFont()!=null){
+            Font base=(Font)j.getClientProperty("marketflow.baseFont");
+            if(base==null){base=c.getFont();j.putClientProperty("marketflow.baseFont",base);}
+            c.setFont(base.deriveFont(base.getSize2D()*size/14f));
+        }
+        if(c instanceof JTable t){t.setRowHeight(size+18);resizeFonts(t.getTableHeader(),size);}
+        if(c instanceof Container box)for(Component child:box.getComponents())resizeFonts(child,size);
+    }
     boolean isBusy(){return busy;} Receipt lastReceipt(){return lastReceipt;}
 }

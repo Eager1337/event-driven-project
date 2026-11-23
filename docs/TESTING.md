@@ -1,5 +1,12 @@
 # Verification evidence
 
+## Improvement round — 23 November 2026
+Fresh local full run: **31 tests passed; 0 failures; 0 errors; 0 skips**, on the same native MySQL 8.4.8/Linux/Xvfb setup described below. DomainTest now has 16 tests, StoreTest 13 and GuiTest 2. The XML/TXT files in `docs/test-results` are refreshed to this run; the earlier totals below are historical.
+
+Added coverage: numeric cart/receipt sorting and table notifications; keyset boundaries with newer inserts, immutable/empty/invalid pages; primary-key EXPLAIN/EXPLAIN ANALYZE on 5,000 synthetic headers; real Older/Newer/Refresh GUI clicks, label associations, receipt sorting, relative text-size increase/restoration and high-contrast background change. Seven screenshots now include both history pages. See `PERFORMANCE-EVIDENCE.md` for actual query-plan output and its limitations.
+
+The user reports their Windows app now loads saved products/sales. That is not an automated Windows test. Real screen readers, physical printing, display scaling and exports still need manual checks. The new CI workflow is configured for 31 tests; consult its actual run status rather than assuming success from the local run.
+
 ## Local full run — 14 November 2026
 Environment: Debian Linux, OpenJDK 21.0.13, Maven, **MySQL Community Server 8.4.8**, Connector/J 26.10.0, Xvfb 1440×1000. Compiler target: Java 17. MySQL was run as a native binary in the sandbox; Docker Compose itself and Windows/macOS scripts were not executed locally.
 
@@ -11,7 +18,7 @@ Result: **25 tests passed; 0 failures; 0 errors; 0 skips.**
 Maven XML/text results are copied into docs/test-results/ in the completed bundle. GitHub Actions independently passed all 25 tests using Temurin Java 17 and a MySQL 8.4 service container in run 43648226441. That first run failed only at ZIP artifact upload because the action rejected a parent-directory path; the workflow now copies the ZIP into the workspace before uploading it. Check the latest Actions run for the complete pipeline status.
 
 ## Reproduce
-Ordinary `mvn clean verify` requires no database and runs only the 14 unit tests; environment-dependent suites are skipped by design.
+Ordinary `mvn clean verify` requires no database and now runs only the 16 unit tests; environment-dependent suites are skipped by design.
 
 Full tests use a separate **marketflow_test** database. Create it with an administrator, apply database/01-schema.sql after replacing `USE marketflow;` with `USE marketflow_test;`, and grant a test user access to that database. Never point tests at a business database: fixtures clear all three test tables.
 

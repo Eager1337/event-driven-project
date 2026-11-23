@@ -99,11 +99,23 @@ public final class Store {
         }
     }
     public List<Sale> sales() throws SQLException {
+        return salesPage(0,1000).rows();
+    }
+    /** Keyset pagination uses the primary-key index instead of increasingly deep OFFSET scans. */
+    public record SalesPage(List<Sale> rows, boolean hasOlder) {
+        public SalesPage { rows = List.copyOf(rows); }
+        public long olderCursor() { return rows.isEmpty() ? 0 : rows.get(rows.size()-1).id(); }
+    }
+    public SalesPage salesPage(long beforeId, int size) throws SQLException {
+        if(beforeId<0 || size<1 || size>1000)throw new IllegalArgumentException("Invalid history cursor or page size (1–1000).");
         List<Sale> results = new ArrayList<>();
-        try (Connection c = db.open(); PreparedStatement s = c.prepareStatement("SELECT * FROM sales ORDER BY id DESC LIMIT 1000"); ResultSet r = s.executeQuery()) {
-            while (r.next()) results.add(readSale(r));
+        String sql="SELECT * FROM sales"+(beforeId==0?"":" WHERE id < ?")+" ORDER BY id DESC LIMIT ?";
+        try (Connection c = db.open(); PreparedStatement s = c.prepareStatement(sql)) {
+            int parameter=1;if(beforeId!=0)s.setLong(parameter++,beforeId);s.setInt(parameter,size+1);
+            try(ResultSet r=s.executeQuery()){while(r.next())results.add(readSale(r));}
         }
-        return results;
+        boolean hasOlder=results.size()>size;
+        return new SalesPage(results.subList(0,Math.min(size,results.size())),hasOlder);
     }
     public Receipt receipt(long id) throws SQLException {
         try (Connection c = db.open()) {

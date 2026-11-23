@@ -7,7 +7,7 @@ Use this guide to understand and rehearse, not to claim work you did not do. Rep
 - Open the **whole project folder** in VS Code or your preferred editor. Source is in `src/main/java/edu/limkokwing/marketflow/`.
 - Open `App.java`, `MainFrame.java`, `Domain.java`, `Tables.java`, `Database.java`, `Store.java` and `database/01-schema.sql` in separate tabs.
 - Start the application from the project root using `scripts\run.bat`. This runs the packaged JAR; it does not automatically compile source edits. Use `mvn clean package` before demonstrating changed Java code.
-- Confirm inventory and sales load successfully. An empty screen with an access-denied error is **not** a working database demo. Resolve the current PC login issue before your presentation.
+- Confirm inventory and sales load successfully. The user reports the earlier PC login issue is resolved; check again before presenting and follow `UPGRADING-SAFELY.md` for this update. An empty screen with an access-denied error is **not** a working database demo.
 - Preserve existing data: never use `docker compose down -v`, delete either MySQL volume, or point automated tests at your business database. Make a private database backup before repairs or migration.
 - Use synthetic demonstration products. Completing checkout creates a real saved sale and reduces stock; do not use important business stock for rehearsal.
 - Keep `docs/Project-Report.pdf`, `docs/TESTING.md`, the repository and this guide ready. Fill in actual names and contributions in the report. Lecturer invitation remains a separate action.
@@ -69,6 +69,8 @@ Speak naturally. The quoted passages are suggested wording, not claims that you 
 
 **Show:** `database/01-schema.sql`, `Store.sales()` and `Store.receipt(long id)`.
 
+**New history feature:** The UI now uses `Store.salesPage()` for 50-row pages. Older sales uses `WHERE id < ? ORDER BY id DESC LIMIT ?`; one extra row detects whether another page exists. Newer sales returns through stored cursors; Refresh returns to newest. Sort headers affect this page only, and Export page CSV saves only this page. Point to `PERFORMANCE-EVIDENCE.md` for the measured primary-key range plan. Do not create fake business sales just to enable pagination.
+
 **Understand:** Closing and reopening proves persistence without restarting MySQL. Docker's named volume preserves MySQL files across ordinary container restarts; deleting that volume is different and destructive.
 
 ### F. Explain inheritance and polymorphism — 1 minute
@@ -109,7 +111,7 @@ Speak naturally. The quoted passages are suggested wording, not claims that you 
 
 **Show:** `docs/TESTING.md`, test result files, README and GitHub workflow.
 
-**Say:** “The recorded full test run passed 25 tests: 14 domain tests, 10 database tests and one multi-step GUI test. Database and GUI tests require explicit settings and an isolated test database; an ordinary Maven run does not run all 25 automatically.”
+**Say:** “The recorded full test run passed 31 tests: 16 domain tests, 13 database tests and two multi-step GUI tests. Database and GUI tests require explicit settings and an isolated test database; an ordinary Maven run does not run all 31 automatically.”
 
 “The project includes documentation, setup instructions and a build workflow. Actual teamwork must be demonstrated by genuine contributions, branches and issues, not invented activity.”
 
@@ -218,7 +220,7 @@ public Connection open() throws SQLException { return DriverManager.getConnectio
 
 The JDBC driver connects using the selected URL, username and password. Configuration is read from root `config.properties`; environment variables `DB_URL`, `DB_USER` and `DB_PASSWORD` override file settings. Passwords are not embedded in source or committed to GitHub.
 
-**Explain the current problem honestly:** “The PC currently has a database authentication mismatch. Access denied indicates login failure; it does not prove that saved rows have disappeared. Opening the same code in another editor does not repair credentials.” Do not say the issue is fixed until the app actually loads saved data.
+**If asked about the earlier login problem:** “Access denied indicated login failure, not proof that saved rows had disappeared. The PC now loads records after its setup was corrected.” Use that wording only if you personally verified loading. This code update does not reset credentials; opening another editor does not fix authentication.
 
 ### 3.7 Saving safely: `Store.checkout()`
 
@@ -303,7 +305,7 @@ Answer first in one sentence, then point to the relevant code. Practise without 
 | What is a foreign key? | A constraint connecting a referenced row, such as sale_items.sale_id to sales.id. |
 | Why store old item names and prices? | Historical receipts must retain what was sold, even after inventory edits. |
 | Where is CRUD? | Product creation, listing and editing are implemented; archiving is logical deletion rather than physical DELETE. |
-| Is CSV export a full database backup? | No. It exports the loaded latest sales summary, not all product and item tables or database configuration. |
+| Is CSV export a full database backup? | No. It exports only the current 50-row history page summary, not all product and item tables or database configuration. |
 | Why SwingWorker? | To avoid freezing the GUI while database or file work runs. |
 | What if the database fails? | The operation reports an error; checkout rolls back handled failures. Credentials/connectivity need repair, not deletion of saved data. |
 | What does MIT provide? | Permission to use, modify and distribute the software subject to the license notice, with its warranty disclaimer. |
@@ -312,7 +314,7 @@ Answer first in one sentence, then point to the relevant code. Practise without 
 | Did all tests run on Windows? | No. Recorded full tests ran on Linux/MySQL and GitHub CI; Windows execution and physical printing require separate checks. |
 | Does the JAR show source changes immediately? | No. Rebuild the Java project and launch the newly built JAR. |
 | Did you write all this independently? | Give a truthful account of assistance, your own changes, setup, study and testing, following university policy. |
-| What would you improve? | Explain one realistic improvement such as authentication, pagination or refunds, and what code/data changes it would require. |
+| What would you improve? | Explain one realistic improvement such as authentication, inventory pagination or refunds, and what code/data changes it would require. Sales history pagination is now implemented. |
 
 ## 5. Rubric evidence and remaining responsibilities
 
@@ -322,12 +324,12 @@ Answer first in one sentence, then point to the relevant code. Practise without 
 | Events — 10 | Listener registrations and observed responses | Trace one complete action in code |
 | Layouts — 10 | BorderLayout, FlowLayout and GridLayout | Explain why each was chosen |
 | OOP — 15 | TypedModel inheritance and concrete overrides | Distinguish inheritance from polymorphism |
-| Database — 15 | Schema, prepared SQL, transaction and saved history | Restore PC login and prove persistence; scalability is bounded, not unlimited |
+| Database — 15 | Schema, prepared SQL, transaction, saved history and measured keyset query plan | Prove persistence and paging on the PC; scalability is bounded, not unlimited |
 | DPG — 5 | License, accessibility and modular source | Explain concrete alignment without claiming certification |
 | Docs/GitHub — 5 | README, report, tests, workflow and contribution guide | Real collaboration evidence and lecturer repository access |
 | Individual demo — 25 | Script, code tour and Q&A practice | Your confidence, understanding and truthful account of contributions |
 
-The rubric's highest database band mentions optimized queries and scalability. This project demonstrates prepared queries, bounded history retrieval and transaction correctness, but does not include connection pooling, a large-scale load benchmark or an unlimited history browser. Discuss these as limits rather than claiming complete production scalability.
+The rubric's highest database band mentions optimized queries and scalability. This project now demonstrates prepared queries, indexed keyset browsing beyond the old 1,000-sale UI limit, bounded page retrieval and transaction correctness. It does not include connection pooling, inventory pagination or a production load benchmark. Discuss these limits rather than claiming complete production scalability. See `SDG-DPG-EVIDENCE.md`, `GROUP-CONTRIBUTIONS.md` and `MOCK-VIVA-PRACTICE.md` for the expanded preparation material.
 
 ## 6. Five rehearsal sessions
 
@@ -353,4 +355,4 @@ If you cannot explain a section yet, say so during study and revisit that method
 
 ## Sources and scope
 
-This guide was checked against the repository's Java source, SQL schema, `docs/DEMONSTRATION.md`, `docs/TESTING.md`, the original assignment and the supplied EDP Group Project Rubric. The code excerpts above are taken from the implementation; short excerpts are labelled and are not standalone runnable programs. It adds documentation only and does not repair the user's Windows database credentials or alter saved records.
+This guide was checked against the repository's Java source, SQL schema, `docs/DEMONSTRATION.md`, `docs/TESTING.md`, the original assignment and the supplied EDP Group Project Rubric. The code excerpts above are taken from the implementation; short excerpts are labelled and are not standalone runnable programs. The improvement round changes Java code and documentation without a schema migration, credential reset or change to saved Windows records.
