@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="edu.limkokwing.marketflow.GuiTest" time="16.907" tests="2" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="edu.limkokwing.marketflow.GuiTest" time="15.039" tests="2" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -14,7 +14,7 @@
     <property name="java.vm.specification.version" value="17"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/temurin-17-jdk-amd64/lib"/>
-    <property name="sun.java.command" value="/home/runner/work/event-driven-project/event-driven-project/target/surefire/surefirebooter-20261123144603165_3.jar /home/runner/work/event-driven-project/event-driven-project/target/surefire 2026-11-23T14-46-02_581-jvmRun1 surefire-20261123144603165_1tmp surefire_0-20261123144603165_2tmp"/>
+    <property name="sun.java.command" value="/home/runner/work/event-driven-project/event-driven-project/target/surefire/surefirebooter-20261123170740911_3.jar /home/runner/work/event-driven-project/event-driven-project/target/surefire 2026-11-23T17-07-40_099-jvmRun1 surefire-20261123170740911_1tmp surefire_0-20261123170740911_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/runner/work/event-driven-project/event-driven-project/target/test-classes:/home/runner/work/event-driven-project/event-driven-project/target/classes:/home/runner/.m2/repository/com/mysql/mysql-connector-j/26.10.0/mysql-connector-j-26.10.0.jar:/home/runner/.m2/repository/com/google/protobuf/protobuf-java/4.36.1/protobuf-java-4.36.1.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/home/runner/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/home/runner/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -29,7 +29,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="/home/runner/work/event-driven-project/event-driven-project/target/surefire/surefirebooter-20261123144603165_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/runner/work/event-driven-project/event-driven-project/target/surefire/surefirebooter-20261123170740911_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="17.0.21+9"/>
     <property name="user.name" value="runner"/>
@@ -55,6 +55,6 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="historyNavigationSortingAndAccessibility" classname="edu.limkokwing.marketflow.GuiTest" time="13.51"/>
-  <testcase name="fullCheckoutAndScreenshots" classname="edu.limkokwing.marketflow.GuiTest" time="3.393"/>
+  <testcase name="historyNavigationSortingAndAccessibility" classname="edu.limkokwing.marketflow.GuiTest" time="12.039"/>
+  <testcase name="fullCheckoutAndScreenshots" classname="edu.limkokwing.marketflow.GuiTest" time="2.993"/>
 </testsuite>
