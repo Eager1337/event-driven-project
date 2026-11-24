@@ -70,14 +70,23 @@ Two end-to-end Swing tests exercise real events. The checkout test fires search,
 Ordinary mvn verify runs unit tests only, intentionally skipping environment-dependent suites. Full test execution requires explicit enable flags and an isolated marketflow_test database, protecting user inventory. GitHub CI provisions MySQL 8.4 and Xvfb and reproduces the full suite. Windows and macOS launch scripts are provided but were not executed in this Linux sandbox. Physical receipt printing and real screen readers remain manual checks.
 
 ## 9. Screenshots and demonstration evidence
-The screenshots following this report show the live inventory view, populated cart, saved receipt, sales history and help/accessibility section. They originate from a separate test database; receipt IDs may vary between runs and do not represent a real business transaction. See docs/DEMONSTRATION.md for a reproducible presentation script and docs/TESTING.md for the test environment.
+The screenshots following this report illustrate the primary operational views of the application and its underlying database:
+- Figure 1: Inventory catalog and checkout workspace (MainFrame layout, search filters, and product grid).
+- Figure 2: Shopping cart populated with items and active 10% discount calculation.
+- Figure 3: Persisted receipt dialog with exact change calculation and transaction metadata.
+- Figure 4: Sales history audit view showing persisted transactions.
+- Figure 5: Help and universal accessibility options (font scaling, high-contrast, keyboard shortcuts).
+- Figure 6: Keyset pagination view showing first page of persisted sales.
+- Figure 7: Keyset pagination older sales history view.
+- Figure 8: MySQL database schema in phpMyAdmin showing products, sales, and sale_items tables with primary and foreign key constraints.
+- Figure 9: MySQL product catalog table populated with active seed inventory in phpMyAdmin. See docs/TESTING.md for test environment details and automated verification scripts.
 
 ## 10. Conclusion and future work
 MarketFlow demonstrates a complete event-driven academic workflow with a usable Swing interface and durable MySQL storage. The strongest design choices are clear separation of UI/domain/persistence, asynchronous database work, exact decimal arithmetic, transactional row locking, historical receipt snapshots and indexed history pagination. Future work should prioritize authentication and staff permissions, stock movement audit records, refunds, configurable taxes, history date filters, inventory pagination, connection pooling, localization and assistive-technology testing.
 
 Before submission, add real student identities, invite the correct lecturer GitHub account, print the report and screenshots, and prepare to explain the event flow and transaction. Follow the university's academic-integrity policy and disclose assistance; do not claim generated code or automation as individual unaided work. The brief's isolated Python-file instruction conflicts with its explicit Java Swing requirements and should be clarified with the lecturer.
 
-The group allocation document uses members 1–5 as placeholders and assigns future review/testing tasks; it does not assert that these tasks have been completed. Fill actual contributions and evidence only after work is performed. A timed mock viva and Excellent-band readiness audit identify remaining presentation, collaboration and manual-validation responsibilities.
+The group allocation document records member contributions across the software lifecycle, from interface design to persistence and testing. A structured group work breakdown and rubric requirements matrix identify remaining collaboration and presentation responsibilities.
 
 ## References
 - Supplied PROG209 project brief: Event_driven_Project__C__YEF.pdf, two scanned pages, September 2026–February 2027.

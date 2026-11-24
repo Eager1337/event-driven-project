@@ -58,7 +58,9 @@ def build(pdf=False):
              ('04-history.png', 'Sales history from the test database'),
              ('05-accessibility.png', 'Help and accessibility options'),
              ('06-history-pagination.png', 'First page of 55 synthetic sale headers'),
-             ('07-older-history.png', 'Older page with the remaining five synthetic headers')]
+             ('07-older-history.png', 'Older page with the remaining five synthetic headers'),
+             ('08-database-schema.png', 'MySQL database schema with products, sales, and sale_items tables in phpMyAdmin'),
+             ('09-database-seed.png', 'Product catalog records and seed data initialized in MySQL')]
     for filename, caption in shots:
         image = ROOT/'docs/screenshots'/filename
         if image.exists():

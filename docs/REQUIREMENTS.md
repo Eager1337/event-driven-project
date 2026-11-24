@@ -11,8 +11,8 @@
 | Accessibility (core) | AccessibleContext names/descriptions, label associations, keyboard actions, contrast/text controls; no unsupported certification claim |
 | DPG alignment — 5 | MIT original code, privacy minimization, extractable text/CSV, documentation, modularity and accessibility; SDG-DPG-EVIDENCE.md maps multiple principles with limits; no formal DPG certification |
 | Documentation & GitHub — 5 | README, setup scripts, report, screenshots, CI, contribution guide, issue templates; lecturer invitation remains user action |
-| Individual presentation/demonstration — 25 | DEMONSTRATION.md, PRESENTATION-STUDY-GUIDE.md and MOCK-VIVA-PRACTICE.md; students must present and explain their actual work |
+| Individual presentation/demonstration — 25 | Live software walkthrough of Swing UI, transactional checkout, and database persistence; individual student code explanation |
 
-See [Excellent-band audit](excellent-audit.report/content.md), [31-test evidence](TESTING.md), [query-plan evidence](PERFORMANCE-EVIDENCE.md) and [proposed group allocation / real evidence log](GROUP-CONTRIBUTIONS.md). No schema change is needed for this round.
+See [Test evidence](TESTING.md), [Query performance evidence](PERFORMANCE-EVIDENCE.md), and [Group contribution log](GROUP-CONTRIBUTIONS.md).
 
 **Important:** Code and documents support the rubric but do not guarantee a mark. Group branches, commits and issues must reflect real contributions. Author identities and student IDs have not been invented. The private repository owner is Eager1337. Confirm the lecturer's GitHub account before inviting anyone; their email in the scanned brief is not treated as a verified GitHub username.
