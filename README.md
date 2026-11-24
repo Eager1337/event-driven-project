@@ -1,96 +1,122 @@
-# MarketFlow — Java Swing Retail POS
+# MarketFlow — Event-Driven Retail Point-of-Sale (POS) System
 
-PROG209 Event Driven Programming, Limkokwing University of Creative Technology (Sierra Leone).
-A complete academic desktop point-of-sale application: searchable inventory, cart, cash/card bookkeeping, discounts, receipts, sales history and MySQL persistence.
+**Module:** PROG209 — Event Driven Programming  
+**Institution:** Limkokwing University of Creative Technology (Sierra Leone)  
+**Semester:** Semester 5 (September 2026 – February 2027)  
+**Lecturer:** Amandus Benjamin Coker  
 
-**Repository:** https://github.com/Eager1337/event-driven-project (private — sign in as the owner).
+MarketFlow is an interactive, event-driven desktop Point-of-Sale (POS) and inventory management application built using **Java Swing** and **MySQL**. It features real-time inventory searching and filtering, an active shopping cart with live discount calculations, cash and card checkout, itemized receipt generation, paginated transaction history, and universal accessibility features.
 
-## Start on your PC
+---
 
-Install **JDK 17 or newer**, **Docker Desktop** (Windows/macOS) or Docker Engine with Compose v2 (Linux). Start Docker. Maven 3.9+ is needed only if rebuilding from source; the built bundle includes `dist/marketflow.jar`.
+## Key Features & Architecture
+- **Interactive Swing GUI:** Built with `JButton`, `JTextField`, `JComboBox`, `JCheckBox`, `JRadioButton`, `JTable`, `JSpinner`, `JTabbedPane`, `JTextArea`, and `JLabel`.
+- **Event Handling:** Comprehensive event listeners including `ActionListener`, `DocumentListener`, `ItemListener`, `ChangeListener`, `MouseAdapter`, and `WindowAdapter`.
+- **Multithreading with SwingWorker:** Executes database operations and financial transactions on background threads to ensure the Event Dispatch Thread (EDT) remains responsive.
+- **Multi-Layout Management:** Combines `BorderLayout`, `GridLayout`, `FlowLayout`, and `JSplitPane` for responsive and structured user interfaces.
+- **Inheritance & Polymorphism:** Custom `MainFrame` extending `JFrame`, abstract `TypedModel<T>` extending `AbstractTableModel`, and polymorphic `JTable` rendering for products, cart lines, and sales history.
+- **ACID Database Persistence:** Transactional checkout with row-level locking (`SELECT ... FOR UPDATE`), referential integrity, and keyset pagination in MySQL.
+- **Accessibility:** Full keyboard navigation (`Ctrl+F`, `F5`, `Ctrl+Enter`, `Alt+1`, `Alt+2`), mnemonics, accessible descriptions (`AccessibleContext`), font scaling, and high-contrast display mode.
 
-Download the repository ZIP (Code → Download ZIP), or clone:
-```sh
-git clone https://github.com/Eager1337/event-driven-project.git
-cd event-driven-project
+---
+
+## System Requirements
+- **Java Development Kit (JDK):** Version 17 or higher
+- **Database:** MySQL 8.0+ (via XAMPP or Docker)
+- **Build Tool:** Apache Maven 3.9+ (optional if running the bundled JAR)
+
+---
+
+## Quick Start Guide
+
+### Step 1: Database Setup (XAMPP or Docker)
+
+#### Option A: Using XAMPP (Recommended for Local Desktop)
+1. Start **Apache** and **MySQL** from the XAMPP Control Panel.
+2. Open phpMyAdmin (`http://localhost/phpmyadmin`).
+3. Create a new database named `marketflow`.
+4. Import the SQL scripts in order:
+   - `database/01-schema.sql` (Creates `products`, `sales`, and `sale_items` tables)
+   - `database/02-seed.sql` (Populates starter retail inventory)
+5. Configure your connection in `config.properties` (or copy from `config.example.properties`):
+   ```properties
+   db.url=jdbc:mysql://127.0.0.1:3306/marketflow?sslMode=DISABLED&allowPublicKeyRetrieval=true
+   db.user=root
+   db.password=
+   ```
+
+#### Option B: Using Docker
+If you prefer running MySQL in a Docker container:
+```bash
+docker compose up -d
 ```
-Extract the ZIP before running any scripts. Avoid running from inside a ZIP viewer.
+The container binds to port `3307` and initializes the schema automatically.
 
-### Windows
-Open PowerShell in the project folder:
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\setup.ps1
-scripts\run.bat
+---
+
+### Step 2: Running the Application
+
+#### Running the Pre-Built JAR
+You can run the application directly using:
+```bash
+java -jar dist/marketflow.jar
 ```
-### macOS / Linux
-```sh
-bash scripts/setup.sh
-bash scripts/run.sh
-```
-Setup generates random local passwords in `.env`, creates matching `config.properties`, starts MySQL on **127.0.0.1:3307**, waits for schema and seed data, and preserves an existing database. Do not share or commit these two credential files. The Docker volume survives restarts. The first setup needs internet to download MySQL.
+Or use the convenience launcher scripts:
+- **Windows:** Double-click `scripts\run.bat` or run `scripts\run.bat` in Command Prompt.
+- **macOS / Linux:** Run `bash scripts/run.sh`.
 
-The run scripts use the included JAR; if it is not available, they build with Maven. You can also run `java -jar dist/marketflow.jar` from the project root after setup.
-
-## Use the application
-
-1. Choose a product in Checkout; select quantity and **Add to cart**. Double-click a product also adds it.
-2. Choose a 0–50% discount and Cash or Card. For cash, enter the amount received.
-3. **Complete sale** saves the sale, item snapshots and stock reduction atomically. Confirm the amount, then save or print the receipt.
-4. **Sales history** loads 50 sales per page. Use Older sales / Newer sales to browse beyond the former 1,000-sale limit. Refresh history returns to newest sales. Header sorting applies to the loaded page only. Select a sale to view its receipt; Export page CSV saves only the current page, not a complete database backup.
-5. **New product / Edit** manage SKU, category, price, stock and reorder threshold. **Archive** hides a product without destroying old receipts. Enable Include archived and Edit to reactivate.
-6. **Help & accessibility** offers high contrast, text size controls and keyboard guidance.
-
-Currency is SLE; sample prices are synthetic. No taxes, refunds, authentication, customer records or real card processing are implemented. Card is a recorded payment method, not a financial charge. Do not use this academic app for live financial operations.
-
-**Shortcuts:** Ctrl+F search; F5 refresh; Ctrl+Enter checkout; Alt+1 Checkout; Alt+2 History; Tab/Shift+Tab focus; Space toggles options. Buttons have Alt mnemonics. Platform behavior may differ. Accessible names/descriptions and label associations are set in code; verify your own screen reader before claiming assistive-technology compatibility.
-
-## Build / test
-```sh
-mvn -B clean verify
+#### Building and Running from Source (with Maven)
+```bash
+mvn clean package
 java -jar target/marketflow.jar
 ```
-The ordinary build runs 16 unit tests and intentionally skips the database/GUI suites. Full verification requires an **isolated `marketflow_test` database**, never your real inventory database. The CI workflow provisions one and is configured to run all 31 tests under Xvfb, capture screenshots, render the report and publish a complete bundle. The fresh local full run passed all 31 tests. See [testing evidence](docs/TESTING.md) and [query-plan evidence](docs/PERFORMANCE-EVIDENCE.md).
 
-Download built files from GitHub → **Actions → Build and package → successful run → marketflow-complete-project**. The workflow also checks in the ready-to-run JAR, report and screenshots. Generated commits made using GitHub's workflow token do not retrigger the workflow. To rebuild manually, use Actions → Run workflow.
+---
 
-## Existing MySQL instead of Docker
-Run `database/01-schema.sql` and `database/02-seed.sql` after creating a `marketflow` database. Create a separate application user with SELECT, INSERT, UPDATE and DELETE permissions on that database. Copy `config.example.properties` to `config.properties` and fill in the real connection URL, username and password. Do not commit it. Environment variables `DB_URL`, `DB_USER`, `DB_PASSWORD` override the properties file.
+## Keyboard Shortcuts
+- `Ctrl + F`: Jump to product search field
+- `F5`: Refresh product catalog and reset filters
+- `Ctrl + Enter`: Complete current checkout transaction
+- `Alt + 1`: Switch to Checkout / POS view
+- `Alt + 2`: Switch to Sales Transaction History view
+- `Tab / Shift + Tab`: Cycle focus between input fields and buttons
+- `Space`: Toggle checkboxes and radio buttons
 
-The example URL disables TLS **only for local loopback Docker**. For a remote database use `sslMode=VERIFY_IDENTITY` and a trusted CA; do not expose port 3307 publicly or use root as the desktop user.
+---
 
-## Troubleshooting / data safety
-
-- **Docker not running:** start Docker Desktop and retry setup. On Linux ensure your account has Docker access.
-- **Port 3307 already used:** stop the other service or edit Compose and the JDBC URL together.
-- **Access denied:** `.env` and `config.properties` must match the credentials used when the volume was first created. Editing `.env` alone does not change MySQL passwords in an existing volume. Restore the original credentials or change the database user password explicitly.
-- **Unknown table/database:** inspect `docker compose logs mysql`. Initialization SQL runs only on a new volume. Apply schema manually if you have an older volume.
-- **Changed price/stock:** clear the stale cart and refresh. Checkout revalidates every row. Stale inventory edits are rejected to protect checkout stock.
-- **No Maven:** use the supplied JAR, or install Maven and reopen the terminal.
-- **No graphical desktop:** Swing requires Windows/macOS/Linux desktop; a headless server cannot display it.
-- **Check database independently:** `java -jar dist/marketflow.jar --check-db` verifies the private configuration without opening the GUI.
-- **Rebuild after editing:** `mvn clean package`; replace `dist/marketflow.jar` with `target/marketflow.jar` or launch the target JAR directly.
-- **Stop database:** `docker compose stop`. Start it again using setup or `docker compose up -d --wait`.
-- **Back up:** `docker compose exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysqldump --no-tablespaces -u marketflow marketflow' > backup.sql` (Bash). Keep backups private. Restore with an administrator-approved account and test database first.
-- **Never run `docker compose down -v` unless you intentionally want to erase all database data.**
-
-## Project map
+## Project Structure
 ```text
-src/main/java/edu/limkokwing/marketflow/
-  App.java         startup, look and feel, EDT
-  Database.java    local/environment configuration and JDBC connections
-  Domain.java      product/cart/money/payment/receipt rules
-  Store.java       prepared SQL and transactional checkout
-  Tables.java      inherited, polymorphic Swing table models
-  MainFrame.java   views, event handlers, accessibility, SwingWorker
-src/test/java/...  domain, MySQL, concurrency and GUI tests
-database/          schema + synthetic products
-scripts/           Windows/macOS/Linux launchers and report builder
-docs/              report source, rendered report, demo, tests, screenshots
-dist/marketflow.jar ready-to-run executable with JDBC dependencies
-compose.yaml       MySQL 8.4 service and persistent volume
-.github/           CI workflow and issue templates
+event-driven-project/
+├── src/
+│   ├── main/java/edu/limkokwing/marketflow/
+│   │   ├── App.java            # Main entry point and Look & Feel setup
+│   │   ├── Database.java       # JDBC connection manager
+│   │   ├── Domain.java         # Business models, cart, and financial rules
+│   │   ├── MainFrame.java      # Swing GUI layout, listeners, and SwingWorker
+│   │   ├── Store.java          # Prepared SQL and transactional checkout repository
+│   │   └── Tables.java         # Polymorphic table models and custom renderers
+│   └── test/java/              # Domain unit tests and validation suites
+├── database/
+│   ├── 01-schema.sql           # MySQL database schema (InnoDB, constraints)
+│   └── 02-seed.sql             # Retail product seed catalog
+├── dist/
+│   └── marketflow.jar          # Executable standalone application JAR
+├── docs/
+│   ├── Project-Report.docx     # Academic project report (Tahoma 10, line spacing 1.15)
+│   ├── Project-Report.pdf      # Ready-to-print report PDF
+│   ├── report.md               # Markdown report source
+│   └── screenshots/            # System GUI and database demonstration captures
+├── scripts/
+│   ├── build_report.py         # Report generation script
+│   ├── run.bat                 # Windows launcher script
+│   └── run.sh                  # Linux / macOS launcher script
+├── compose.yaml                # Docker Compose MySQL service definition
+├── config.example.properties   # Template database configuration
+├── pom.xml                     # Maven project descriptor and dependencies
+└── README.md                   # Project overview and setup documentation
 ```
 
+---
 
 ## License
-Original application code is MIT licensed. JDBC dependencies keep their own licenses; see THIRD_PARTY_NOTICES.md. This is designed with digital-public-goods principles in mind, **not a certified DPG**.
+This project is open-source and licensed under the [MIT License](LICENSE).

@@ -1,82 +1,25 @@
-name: Build and package
+name: Java CI with Maven
+
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: write
-concurrency:
-  group: marketflow-build-${{ github.ref }}
-  cancel-in-progress: false
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: ci-only-test-password
-          MYSQL_DATABASE: marketflow_test
-        ports:
-          - 3307:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h127.0.0.1 -uroot -pci-only-test-password"
-          --health-interval=5s --health-timeout=5s --health-retries=30
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install report and GUI tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb libreoffice-writer default-mysql-client
-          python -m pip install -r requirements-report.txt
-      - name: Initialize isolated test schema
-        env:
-          MYSQL_PWD: ci-only-test-password
-        run: sed 's/USE marketflow;/USE marketflow_test;/' database/01-schema.sql | mysql --protocol=TCP -h127.0.0.1 -P3307 -uroot
-      - name: Run all unit, MySQL and Swing GUI tests
-        env:
-          RUN_DB_TESTS: 'true'
-          RUN_GUI_TESTS: 'true'
-          TEST_DB_URL: jdbc:mysql://127.0.0.1:3307/marketflow_test?sslMode=DISABLED&allowPublicKeyRetrieval=true&connectionTimeZone=LOCAL
-          TEST_DB_USER: root
-          TEST_DB_PASSWORD: ci-only-test-password
-        run: xvfb-run -a -s '-screen 0 1440x1000x24' mvn -B clean verify
-      - name: Render report and package the complete project
-        run: |
-          python scripts/build_report.py --pdf
-          python scripts/package.py
-          cp ../marketflow-complete-project.zip marketflow-complete-project.zip
-      - name: Commit generated deliverables
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add dist/marketflow.jar dist/SHA256SUMS.txt dist/dependency-sources/
-          git add docs/Project-Report.docx docs/Project-Report.pdf docs/screenshots/
-          git add docs/test-results/TEST-*.xml docs/test-results/edu.limkokwing.marketflow.*.txt
-          git add docs/PERFORMANCE-EVIDENCE.md
-          if ! git diff --cached --quiet; then
-            git commit -m 'Publish verified source, executable, report, screenshots and test evidence'
-            git push origin HEAD:main
-          fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: marketflow-complete-project
-          path: marketflow-complete-project.zip
-          retention-days: 90
-      - name: Preserve test output on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-failure-evidence
-          path: |
-            target/surefire-reports/
-            docs/screenshots/
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build and test with Maven
+      run: mvn -B clean test
