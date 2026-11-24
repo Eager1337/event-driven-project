@@ -11,9 +11,9 @@ SELECT * FROM sales WHERE id < 2556 ORDER BY id DESC LIMIT 51
 EXPLAIN: key `PRIMARY`, access type `range`.
 
 ```text
--> Limit: 51 row(s)  (cost=500 rows=51) (actual time=0.112..0.125 rows=51 loops=1)
-    -> Filter: (sales.id < 2556)  (cost=500 rows=2500) (actual time=0.107..0.116 rows=51 loops=1)
-        -> Index range scan on sales using PRIMARY over (id < 2556) (reverse)  (cost=500 rows=2500) (actual time=0.0991..0.105 rows=51 loops=1)
+-> Limit: 51 row(s)  (cost=500 rows=51) (actual time=0.0849..0.097 rows=51 loops=1)
+    -> Filter: (sales.id < 2556)  (cost=500 rows=2500) (actual time=0.0807..0.0897 rows=51 loops=1)
+        -> Index range scan on sales using PRIMARY over (id < 2556) (reverse)  (cost=500 rows=2500) (actual time=0.0736..0.0793 rows=51 loops=1)
 
 ```
 
